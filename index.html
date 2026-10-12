@@ -24,7 +24,139 @@
   .success-card .pay-btn { width:100%; }
   @media (prefers-reduced-motion: reduce) { .item.added,.cart-fab.bump,.cart-badge.pop { animation:none; } .success-overlay,.success-card { transition:none; } .success-overlay.show .success-circle,.success-overlay.show .success-check { animation:none; stroke-dashoffset:0; } }
 
-</style></head><body>
+
+  .payment-options{display:grid;grid-template-columns:1fr;gap:10px}
+  .payment-option{position:relative;display:flex;align-items:center;gap:13px;padding:15px;border:1.5px solid var(--line);border-radius:18px;background:var(--bg);cursor:pointer;transition:border-color .22s ease,background .22s ease,transform .22s ease,box-shadow .22s ease}
+  .payment-option:active{transform:scale(.99)}
+  .payment-option input{position:absolute;opacity:0;pointer-events:none}
+  .payment-icon{flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#e8f2e5;font-size:23px}
+  .qris-icon{color:#1b4528;font-size:29px;font-weight:800}
+  .payment-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+  .payment-copy strong{color:var(--fg);font-family:var(--font-display);font-size:1rem}
+  .payment-copy small{color:var(--muted);font-size:.8rem;line-height:1.35}
+  .payment-check{display:grid;place-items:center;width:23px;height:23px;border:1.5px solid var(--line);border-radius:50%;color:transparent;font-size:13px;transition:all .2s ease}
+  .payment-option:has(input:checked){border-color:var(--green);background:var(--surface);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 9%,transparent)}
+  .payment-option:has(input:checked) .payment-check{border-color:var(--green);background:var(--green);color:#fff}
+  .payment-option:has(input:focus-visible){outline:2px solid var(--green);outline-offset:3px}
+  @media(min-width:390px){.payment-options{grid-template-columns:1fr 1fr}.payment-option{align-items:flex-start;flex-wrap:wrap;gap:9px}.payment-copy{flex-basis:calc(100% - 60px)}.payment-check{position:absolute;right:12px;top:12px}}
+  @media(prefers-reduced-motion:reduce){.payment-option,.payment-check{transition:none}}
+\n
+/* Manajemen stok per varian */
+.admin-stock-card{margin:0 0 22px;background:#fffdf7;border:1px solid #e5e9dd;border-radius:18px;padding:22px}
+.admin-stock-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px}
+.admin-stock-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid #e4e8df;border-radius:14px;background:#fff}
+.admin-stock-name{font-weight:700;color:#253d2c}
+.admin-stock-state{display:block;font-size:12px;color:#6d776d;margin-top:4px}
+.admin-stock-toggle{border:0;border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap}
+.admin-stock-toggle.out{background:#fae7e2;color:#9d3528}
+.admin-stock-toggle.in{background:#e6f2e5;color:#28663b}
+.customer-stock-status{display:none;margin:8px 0 0;padding:7px 10px;border-radius:8px;background:#fae7e2;color:#9d3528;font-size:12px;font-weight:800;letter-spacing:.02em;width:max-content;max-width:100%}
+.item.is-out-of-stock .customer-stock-status{display:block}
+.item.is-out-of-stock .q-btn[data-act="plus"]{opacity:.35;cursor:not-allowed}
+.item.is-out-of-stock .q-val{color:#9d3528}
+@media(max-width:600px){.admin-stock-card{padding:16px}.admin-stock-item{align-items:flex-start;flex-direction:column}.admin-stock-toggle{width:100%}}
+
+</style>
+<style>
+.role-gate{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:22px;background:rgba(10,28,16,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease}
+.role-gate.show{opacity:1;visibility:visible}
+.role-panel{width:min(100%,440px);padding:30px 24px 24px;border:1px solid rgba(255,255,255,.7);border-radius:28px;background:var(--bg);color:var(--fg);box-shadow:0 28px 90px rgba(0,0,0,.22);text-align:center;transform:translateY(14px) scale(.98);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.role-gate.show .role-panel{transform:none}
+.role-mark{width:48px;height:48px;display:grid;place-items:center;margin:0 auto 18px;border-radius:16px;background:#e8f2e5;color:var(--green-deep)}
+.role-kicker{margin:0 0 8px;color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.role-title{margin:0;font:800 clamp(1.7rem,7vw,2.15rem)/1.08 var(--font-display);letter-spacing:-.04em}
+.role-desc{margin:12px 0 24px;color:var(--muted);font-size:.94rem;line-height:1.6}
+.role-options{display:grid;gap:11px;text-align:left}
+.role-option{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fff;color:var(--fg);font:inherit;text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.role-option:hover{transform:translateY(-2px);border-color:var(--green);background:var(--surface);box-shadow:0 8px 22px rgba(27,69,40,.08)}
+.role-option:active{transform:scale(.99)}
+.role-option:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.role-icon{flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:var(--surface);color:var(--green-deep)}
+.role-icon svg{width:23px;height:23px}
+.role-copy{display:flex;flex:1;flex-direction:column;gap:3px}
+.role-copy strong{font:700 1rem/1.25 var(--font-display)}
+.role-copy small{color:var(--muted);font-size:.8rem;line-height:1.4}
+.role-arrow{color:var(--green);font-size:1.25rem}
+.role-foot{margin:20px 0 0;color:var(--muted);font-size:.75rem;letter-spacing:.04em}
+@media(prefers-reduced-motion:reduce){.role-gate,.role-panel,.role-option{transition:none}}
+.admin-layer{position:fixed;inset:0;z-index:400;display:none;overflow:auto;background:rgba(13,29,18,.34);backdrop-filter:blur(10px) saturate(.82);-webkit-backdrop-filter:blur(10px) saturate(.82);color:#183321;font-family:'DM Sans',sans-serif}
+.admin-layer.show{display:block;animation:admin-in .28s ease both}
+.admin-layer.dashboard-open{background:#f5f8f3;backdrop-filter:none;-webkit-backdrop-filter:none}
+@keyframes admin-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.admin-login-wrap{min-height:100%;display:grid;place-items:center;padding:22px;box-sizing:border-box;background:transparent}
+.admin-login{width:min(100%,420px);box-sizing:border-box;padding:30px;border:1px solid #dce8dc;border-radius:26px;background:rgba(255,255,250,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 24px 80px rgba(10,30,15,.24)}
+.admin-brand{display:flex;align-items:center;gap:12px;margin-bottom:25px}.admin-brand-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:#e7f2e5;color:#2d693e;font-size:23px}.admin-brand strong{display:block;font-size:1.1rem;letter-spacing:-.03em}.admin-brand small{color:#718374}
+.admin-login h2{margin:0 0 8px;font-size:1.7rem;letter-spacing:-.04em}.admin-login p{color:#6a7c6d;line-height:1.55}.admin-field{display:grid;gap:7px;margin:17px 0}.admin-field label{font-size:.86rem;font-weight:700}.admin-field input{box-sizing:border-box;width:100%;padding:14px 15px;border:1px solid #d9e5da;border-radius:13px;background:#fbfdfb;font:inherit;outline:none}.admin-field input:focus{border-color:#39764a;box-shadow:0 0 0 3px #39764a18}.admin-primary,.admin-secondary{border:0;border-radius:13px;padding:13px 16px;font:700 .95rem 'DM Sans',sans-serif;cursor:pointer}.admin-primary{background:#285f38;color:#fff}.admin-primary:hover{background:#1d4d2c}.admin-secondary{background:#eaf2e8;color:#285f38}.admin-login .admin-primary{width:100%;margin-top:5px}.admin-error{min-height:18px;margin:10px 0 0;color:#b33b32!important;font-size:.85rem}.admin-back{margin-top:12px;width:100%}
+.admin-topbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px clamp(16px,4vw,42px);background:#fff;border-bottom:1px solid #e2ebe1}.admin-topbrand{font-weight:800;letter-spacing:-.03em}.admin-topbrand small{display:block;margin-top:3px;color:#718374;font-size:.75rem;font-weight:500;letter-spacing:0}.admin-content{max-width:1200px;margin:auto;padding:28px clamp(16px,4vw,42px) 48px}.admin-heading{display:flex;justify-content:space-between;align-items:end;gap:15px;flex-wrap:wrap;margin-bottom:23px}.admin-heading h1{margin:0;font-size:clamp(1.65rem,4vw,2.2rem);letter-spacing:-.05em}.admin-heading p{margin:7px 0 0;color:#718374}.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.admin-stat,.admin-card{padding:20px;border:1px solid #e0e9df;border-radius:20px;background:#fff;box-shadow:0 8px 24px #173a2110}.admin-stat span{display:block;color:#708171;font-size:.82rem}.admin-stat strong{display:block;margin-top:11px;font-size:clamp(1.2rem,3vw,1.8rem);letter-spacing:-.04em;overflow-wrap:anywhere}.admin-stat small{display:block;margin-top:5px;color:#78907a;font-size:.75rem}.admin-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:16px;margin-top:16px}.admin-card h2{margin:0 0 5px;font-size:1.08rem}.admin-card .sub{margin:0 0 18px;color:#7b8b7d;font-size:.82rem}.admin-bars{display:flex;align-items:end;gap:10px;height:190px;padding-top:12px;border-bottom:1px solid #e1e9df}.admin-bar-item{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:8px}.admin-bar{width:min(34px,75%);min-height:3px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#7fbd83,#2e7040);transition:height .35s}.admin-bar-item small{font-size:.7rem;color:#7a897b}.admin-bar-item b{font-size:.68rem;color:#4a6550;font-weight:600}.admin-products{display:grid;gap:13px}.admin-product{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;font-size:.86rem}.admin-product-name{overflow-wrap:anywhere}.admin-product-track{grid-column:1/-1;height:7px;border-radius:99px;background:#edf3ec;overflow:hidden}.admin-product-track span{display:block;height:100%;border-radius:99px;background:#69a875}.admin-table-wrap{overflow-x:auto;margin-top:16px}.admin-table{width:100%;border-collapse:collapse;min-width:560px;font-size:.84rem}.admin-table th,.admin-table td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf1ec;vertical-align:top}.admin-table th{color:#738274;font-weight:600}.admin-empty{padding:22px;text-align:center;color:#78887a;background:#f8fbf7;border-radius:12px;font-size:.88rem}.admin-note{margin-top:17px;color:#7b8b7d;font-size:.78rem;line-height:1.5}
+@media(max-width:850px){.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-grid{grid-template-columns:1fr}}
+@media(max-width:430px){.admin-login{padding:23px}.admin-topbar{align-items:flex-start}.admin-content{padding-top:22px}.admin-stat,.admin-card{padding:16px}}
+/* Tata letak dashboard admin yang nyaman di tablet dan HP */
+#admin-dashboard-view{min-width:0;width:100%;overflow-x:clip}
+#admin-dashboard-view *{box-sizing:border-box}
+.admin-topbar{padding-top:max(12px,env(safe-area-inset-top));min-width:0}
+.admin-topbrand{min-width:0;overflow-wrap:anywhere;line-height:1.25}
+.admin-topbar button,.admin-heading button{min-height:42px;flex-shrink:0}
+.admin-content{width:100%;min-width:0}
+.admin-stats,.admin-grid{min-width:0}
+.admin-stat,.admin-card,.admin-stock-card{min-width:0;overflow-wrap:anywhere}
+.admin-bars{min-width:0;gap:clamp(4px,1.4vw,10px)}
+.admin-bar-item{min-width:0}
+.admin-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.admin-table{white-space:normal}
+.admin-stock-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+@media(max-width:600px){
+  .admin-topbar{gap:10px;padding-left:14px;padding-right:14px}
+  .admin-topbrand{font-size:.95rem}
+  .admin-topbrand small{font-size:.68rem}
+  .admin-topbar .admin-secondary{padding:10px 13px;font-size:.85rem}
+  .admin-content{padding:20px 14px calc(30px + env(safe-area-inset-bottom))}
+  .admin-heading{align-items:stretch;gap:14px;margin-bottom:18px}
+  .admin-heading>div{min-width:0}
+  .admin-heading h1{font-size:1.65rem;line-height:1.12}
+  .admin-heading p{font-size:.88rem;line-height:1.5}
+  .admin-heading button{width:100%;justify-content:center}
+  .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .admin-stat{padding:14px;border-radius:15px}
+  .admin-stat span{font-size:.75rem;line-height:1.35}
+  .admin-stat strong{font-size:clamp(1.05rem,5vw,1.45rem);margin-top:8px}
+  .admin-stat small{font-size:.68rem;line-height:1.35}
+  .admin-stock-card{padding:15px;margin-bottom:14px;border-radius:16px}
+  .admin-stock-card h2,.admin-card h2{font-size:1rem;line-height:1.3}
+  .admin-stock-card>.sub,.admin-card .sub{font-size:.78rem;line-height:1.45}
+  .admin-stock-list{grid-template-columns:minmax(0,1fr);gap:9px}
+  .admin-stock-item{align-items:center;flex-direction:row;padding:12px;gap:10px}
+  .admin-stock-item>div{min-width:0;flex:1}
+  .admin-stock-name{font-size:.88rem;overflow-wrap:anywhere}
+  .admin-stock-state{font-size:.72rem;line-height:1.35}
+  .admin-stock-toggle{width:auto;max-width:46%;padding:10px 11px;white-space:normal;line-height:1.2}
+  .admin-grid{grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
+  .admin-card{padding:15px;border-radius:16px}
+  .admin-bars{height:165px;gap:5px;padding-top:8px}
+  .admin-bar-item{gap:6px}
+  .admin-bar-item small{font-size:.62rem}
+  .admin-bar-item b{font-size:.58rem;overflow-wrap:anywhere;text-align:center}
+  .admin-products{gap:12px}
+  .admin-product{font-size:.8rem;grid-template-columns:minmax(0,1fr) auto}
+  .admin-table-wrap{padding:15px}
+  .admin-table{min-width:500px;font-size:.78rem}
+  .admin-table th,.admin-table td{padding:10px 8px}
+  .admin-note{font-size:.74rem;line-height:1.55}
+}
+@media(max-width:360px){
+  .admin-topbrand{font-size:.85rem}
+  .admin-topbrand small{font-size:.63rem}
+  .admin-topbar .admin-secondary{padding:9px 10px}
+  .admin-content{padding-left:10px;padding-right:10px}
+  .admin-stats{gap:8px}
+  .admin-stat{padding:11px}
+  .admin-stat span{font-size:.7rem}
+  .admin-stat strong{font-size:1.02rem}
+  .admin-stock-item{align-items:stretch;flex-direction:column}
+  .admin-stock-toggle{max-width:none;width:100%}
+}
+</style>
+
+</head><body>
 <title>SI MATCHA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -308,16 +440,24 @@
   .sheet.open { opacity: 1; pointer-events: auto; }
   .sheet-card {
     position: relative;
-    width: 100%;
-    max-width: 420px;
-    max-height: 100%;
+    width: min(100%, 390px);
+    max-width: 390px;
+    max-height: min(88dvh, 760px);
+    box-sizing: border-box;
     overflow-y: auto;
-    padding: 12px 12px 26px;
-    border-radius: 28px;
+    margin-inline: auto;
+    padding: 18px 16px 22px;
+    border: 1px solid rgba(255,255,255,.55);
+    border-radius: 24px;
     background: var(--bg);
     color: var(--fg);
+    box-shadow: 0 24px 70px rgba(0,0,0,.22);
     transform: translateY(18px) scale(0.98);
     transition: transform 0.25s ease;
+  }
+  @media (max-width: 420px) {
+    .sheet { padding: 12px; }
+    .sheet-card { width: 100%; max-width: 390px; max-height: 88dvh; border-radius: 22px; }
   }
   .sheet.open .sheet-card { transform: none; }
   .sheet-img {
@@ -482,13 +622,16 @@
   }
 
   .cart-card {
-    max-width: 440px;
+    width: min(100%, 390px);
+    max-width: 390px;
     display: flex;
     flex-direction: column;
     gap: 14px;
     padding: 22px 18px;
   }
   .cart-card .sheet-close { top: 14px; right: 14px; background: var(--surface); color: var(--fg); }
+  /* Sembunyikan tombol X ketika pelanggan sedang berada di halaman pembayaran QRIS. */
+  #cart.qris-payment-active #cart-close { display: none !important; }
   .cart-title {
     margin: 0;
     padding-right: 48px;
@@ -718,6 +861,49 @@
   .item .q-btn[data-act="plus"] { box-shadow:0 4px 10px -3px rgba(27,69,40,.55); }
   .cart-fab { background:#1b4528; box-shadow:0 8px 24px rgba(27,69,40,.4); }
   .cart-fab:focus-visible, .pay-btn:focus-visible { outline-color:#1b4528; }
+
+/* Mobile refinement: inset panels, fixed checkout action, vertical-only scrolling, modal scroll lock. */
+.role-gate{padding:18px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.role-panel{box-sizing:border-box;width:min(100%,440px);min-width:0;margin-inline:auto}
+.role-option{box-sizing:border-box;min-width:0}
+.role-copy{min-width:0;overflow-wrap:anywhere}
+html,body{max-width:100%;overflow-x:clip}
+.field input,.field textarea{box-sizing:border-box;max-width:100%;min-width:0}
+.cart-card{box-sizing:border-box;width:min(100%,390px);max-width:390px;min-width:0;overflow-x:hidden;margin-inline:auto}
+.checkout{min-width:0;max-width:100%;overflow-x:hidden}
+.sheet{box-sizing:border-box;padding:18px;overscroll-behavior:contain}
+.sheet-card{box-sizing:border-box;width:min(100%,390px);max-width:390px;margin-inline:auto}
+html.modal-locked{overflow:hidden;overscroll-behavior:none} body.modal-locked{overflow:hidden;overscroll-behavior:none}
+/* Keep scrolling available inside the active dialog while the page behind it is frozen. */
+.sheet,.sheet-card,.sheet-card *,.role-gate,.role-panel,.success-overlay,.success-card,.admin-layer{touch-action:pan-y;overscroll-behavior:contain}
+.sheet{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.sheet-card{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:600px){
+  .role-gate{padding:16px}
+  .role-panel{padding:25px 18px 20px;border-radius:24px}
+  .role-desc{margin-bottom:20px}
+  .role-option{gap:10px;padding:13px 12px;border-radius:15px}
+  .role-icon{flex-basis:40px;width:40px;height:40px}
+  .role-copy strong{font-size:.94rem}
+  .role-copy small{font-size:.76rem}
+  .sheet{padding:14px}
+  .cart-card:has(#checkout:not([hidden])){height:min(90dvh,760px);height:min(90vh,760px);max-height:calc(100dvh - 28px);max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:18px 14px calc(12px + env(safe-area-inset-bottom))}
+  #checkout.checkout:not([hidden]){position:static;display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;overscroll-behavior-x:none;-webkit-overflow-scrolling:touch;padding:0 2px 92px;scrollbar-width:thin;touch-action:pan-y}
+  /* Tombol pembayaran melekat di bagian bawah area checkout, bukan ikut bergulir bersama isi form. */
+  #checkout-go{position:sticky;left:auto;right:auto;bottom:0;align-self:center;transform:none;width:min(100%,354px);box-sizing:border-box;z-index:8;flex:0 0 auto;margin:10px 0 0;padding:15px 16px;box-shadow:0 -8px 18px rgba(251,253,251,.98),0 5px 16px rgba(0,0,0,.10);background:var(--card)}
+  #checkout .field,#checkout .cart-total,#checkout .payment-options{min-width:0;max-width:100%}
+  #checkout .payment-option{box-sizing:border-box;min-width:0}
+  .cart-view{min-width:0;max-width:100%;padding-inline:0}
+}
+@media(max-width:360px){
+  .role-gate{padding:12px}
+  .role-panel{padding:22px 14px 18px}
+  .role-option{gap:8px;padding:12px 10px}
+  .role-copy small{font-size:.72rem}
+  .sheet{padding:12px}
+  .cart-card{padding-inline:12px}
+  #checkout-go{width:100%}
+}
 </style>
 
 <div class="splash" id="splash" aria-hidden="true">
@@ -729,14 +915,101 @@
     <p class="splash-sub">Get Premium Matcha</p>
   </div>
 </div>
+
+<div class="role-gate" id="role-gate" role="dialog" aria-modal="true" aria-labelledby="role-title" aria-hidden="true">
+  <section class="role-panel">
+    <div class="role-mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 25C6 13 14 6 26 5c-1 12-8 20-20 20Z"/><path d="M6 25 20 11"/></svg>
+    </div>
+    <p class="role-kicker">Welcome to SI MATCHA</p>
+    <h2 class="role-title" id="role-title">Selamat datang</h2>
+    <p class="role-desc">Silakan pilih cara masuk untuk melanjutkan.</p>
+    <div class="role-options">
+      <button type="button" class="role-option" id="enter-customer">
+        <span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3A4.5 4.5 0 0 1 15 18.5V20"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6.1M18 14.5a4.5 4.5 0 0 1 3 4.2V20"/></svg></span>
+        <span class="role-copy"><strong>Masuk sebagai Customer</strong><small>Lihat menu, pilih minuman, dan buat pesanan.</small></span>
+        <span class="role-arrow" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="role-option" id="enter-admin">
+        <span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M8 9h8M8 13h4M16.5 16h.01"/></svg></span>
+        <span class="role-copy"><strong>Masuk sebagai Admin</strong><small>Akses area pengelolaan SI MATCHA SHOP.</small></span>
+        <span class="role-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+    <p class="role-foot">SI MATCHA SHOP · Get Premium Matcha</p>
+  </section>
+</div>
+<div class="admin-layer" id="admin-layer" aria-hidden="true">
+  <section class="admin-login-wrap" id="admin-login-view">
+    <form class="admin-login" id="admin-login-form" autocomplete="off">
+      <h2>Login Admin</h2><p>Masuk untuk melihat ringkasan dan analisis penjualan toko.</p>
+      <div class="admin-field"><label for="admin-username">Username</label><input id="admin-username" name="username" type="text" placeholder="Masukkan username" autocomplete="username" required></div>
+      <div class="admin-field"><label for="admin-password">Kata sandi</label><input id="admin-password" name="password" type="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required></div>
+      <button class="admin-primary" type="submit">Masuk ke Dashboard <span aria-hidden="true">→</span></button>
+      <p class="admin-error" id="admin-login-error" role="alert" aria-live="polite"></p>
+      <button class="admin-secondary admin-back" id="admin-login-back" type="button">← Kembali ke pilihan masuk</button>
+    </form>
+  </section>
+  <section id="admin-dashboard-view" hidden>
+    <header class="admin-topbar"><div class="admin-topbrand">🍵 SI MATCHA SHOP <small>Admin · Analisis penjualan</small></div><button class="admin-secondary" id="admin-logout" type="button">Keluar</button></header>
+    <main class="admin-content">
+      <div class="admin-heading"><div><h1>Dashboard Penjualan</h1><p>Ringkasan pesanan yang tercatat di browser ini.</p></div><button class="admin-secondary" id="admin-refresh" type="button">↻ Perbarui data</button></div>
+      <div class="admin-stats">
+        <article class="admin-stat"><span>Total omzet tercatat</span><strong id="admin-revenue">Rp 0</strong><small>Nilai dari pesanan tercatat</small></article>
+        <article class="admin-stat"><span>Total pesanan</span><strong id="admin-orders">0</strong><small>Pesanan yang tercatat</small></article>
+        <article class="admin-stat"><span>Minuman terjual</span><strong id="admin-units">0</strong><small>Total jumlah item</small></article>
+        <article class="admin-stat"><span>Rata-rata pesanan</span><strong id="admin-average">Rp 0</strong><small>Omzet ÷ jumlah pesanan</small></article>
+      </div>
+      <article class="admin-stock-card">
+        <h2>Kontrol stok minuman</h2>
+        <p class="sub">Pilih varian yang sedang kosong. Status akan ditampilkan di menu pelanggan pada browser yang sama.</p>
+        <div class="admin-stock-list" id="admin-stock-list"></div>
+      </article>
+      <div class="admin-grid">
+        <article class="admin-card"><h2>Aktivitas 7 hari terakhir</h2><p class="sub">Omzet berdasarkan tanggal pesanan</p><div class="admin-bars" id="admin-bars"></div></article>
+        <article class="admin-card"><h2>Menu terlaris</h2><p class="sub">Diurutkan berdasarkan jumlah item</p><div class="admin-products" id="admin-products"></div></article>
+      </div>
+      <article class="admin-card admin-table-wrap"><h2>Pesanan terbaru</h2><p class="sub">Data ringkas tanpa nomor telepon atau alamat pelanggan</p><div id="admin-order-table"></div></article>
+      <p class="admin-note">Catatan: karena website ini masih berupa HTML statis, data analisis disimpan di browser/perangkat yang mencatat pesanan ini. Data belum otomatis tersinkron ke perangkat admin lain. Untuk analisis penjualan lintas perangkat dan perlindungan login sungguhan, perlu Firebase Authentication dan database.</p>
+    </main>
+  </section>
+</div>
+
 <script>
+(function () {
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  function resetPageTop() { window.scrollTo(0, 0); }
+  resetPageTop();
+  window.addEventListener("load", resetPageTop, { once: true });
+  window.addEventListener("pageshow", function () {
+    resetPageTop();
+    try {
+      if (sessionStorage.getItem("siMatchaShowOrderSuccess") === "1") {
+        sessionStorage.removeItem("siMatchaShowOrderSuccess");
+        window.setTimeout(function () {
+          window.dispatchEvent(new Event("siMatchaOrderReturned"));
+        }, 450);
+      }
+    } catch (e) {}
+  });
+})();
 (function () {
   var el = document.getElementById("splash"), root = document.documentElement, done = false;
   root.classList.add("splash-lock");
   function finish() {
     if (done) return; done = true;
     el.classList.add("out");
-    setTimeout(function () { el.classList.add("gone"); root.classList.remove("splash-lock"); }, 750);
+    setTimeout(function () {
+      el.classList.add("gone");
+      root.classList.remove("splash-lock");
+      var gate = document.getElementById("role-gate");
+      if (gate) {
+        gate.classList.add("show");
+        gate.setAttribute("aria-hidden", "false");
+        var firstChoice = document.getElementById("enter-customer");
+        if (firstChoice) firstChoice.focus({ preventScroll: true });
+      }
+    }, 750);
   }
   el.addEventListener("click", finish);
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -850,6 +1123,13 @@
         <p class="err" id="e-tel" hidden>Isi nomor telepon yang benar</p>
       </div>
       <div class="cart-total"><span>Total</span><strong id="checkout-total"></strong></div>
+      <div class="field payment-choice-wrap">
+        <span class="lbl" id="payment-lbl">Pilih metode pembayaran</span>
+        <div class="payment-options" role="radiogroup" aria-labelledby="payment-lbl">
+          <label class="payment-option" for="pay-cod"><input id="pay-cod" type="radio" name="payment" value="cod" checked><span class="payment-icon" aria-hidden="true">💵</span><span class="payment-copy"><strong>COD</strong><small>Bayar saat pesanan diterima</small></span><span class="payment-check" aria-hidden="true">✓</span></label>
+          <label class="payment-option" for="pay-qris"><input id="pay-qris" type="radio" name="payment" value="qris"><span class="payment-icon qris-icon" aria-hidden="true">▦</span><span class="payment-copy"><strong>QRIS</strong><small>Bayar dengan scan kode QR</small></span><span class="payment-check" aria-hidden="true">✓</span></label>
+        </div>
+      </div>
       <button class="pay-btn" id="checkout-go" type="button">Lanjutkan Pembayaran</button>
     </form>
     <div class="pay-view" id="pay-view" hidden>
@@ -906,12 +1186,8 @@
   var prices = [13000, 17000, 20000, 20000, 21000, 21000, 21000, 23000];
   var qty = [0, 0, 0, 0, 0, 0, 0, 0];
   var KEY = "si-matcha-cart";
-  try {
-    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (Array.isArray(saved) && saved.length === qty.length) {
-      qty = saved.map(function (n) { n = Math.floor(Number(n)); return n > 0 && n < 100 ? n : 0; });
-    }
-  } catch (e) {}
+  // Keranjang sengaja dikosongkan setiap halaman dimuat ulang.
+  try { localStorage.removeItem(KEY); } catch (e) {}
 
   var MINUS = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10"/></svg>';
   var PLUS = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M8 3v10"/></svg>';
@@ -945,9 +1221,64 @@
   function fmt(n) { return n.toLocaleString("id-ID"); }
   function rp(n) { return "<small>Rp</small>" + fmt(n); }
 
+  var lockedScrollY = 0;
+  var scrollLockActive = false;
+  var savedBodyStyles = null;
+  var savedRootScrollBehavior = "";
   function lock() {
-    var open = sheet.classList.contains("open") || cart.classList.contains("open");
-    document.body.style.overflow = open ? "hidden" : "";
+    var successOverlay = document.getElementById("success-overlay");
+    var roleGateEl = document.getElementById("role-gate");
+    var adminLayerEl = document.getElementById("admin-layer");
+    var root = document.documentElement;
+    var body = document.body;
+    var open = sheet.classList.contains("open") || cart.classList.contains("open") ||
+      !!(successOverlay && successOverlay.classList.contains("show")) ||
+      !!(roleGateEl && roleGateEl.classList.contains("show")) ||
+      !!(adminLayerEl && adminLayerEl.classList.contains("show"));
+
+    /* Lock the document body at its current position. This prevents background
+       scrolling on mobile without losing the exact scroll position on close. */
+    if (open && !scrollLockActive) {
+      lockedScrollY = window.scrollY || window.pageYOffset || 0;
+      savedRootScrollBehavior = root.style.scrollBehavior;
+      savedBodyStyles = {
+        position: body.style.position,
+        top: body.style.top,
+        left: body.style.left,
+        right: body.style.right,
+        width: body.style.width,
+        overflow: body.style.overflow
+      };
+      scrollLockActive = true;
+      root.classList.add("modal-locked");
+      body.classList.add("modal-locked");
+      body.style.position = "fixed";
+      body.style.top = (-lockedScrollY) + "px";
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+      body.style.overflow = "hidden";
+    } else if (!open && scrollLockActive) {
+      scrollLockActive = false;
+      /* Restore the page without inheriting the site's smooth-scroll animation.
+         Otherwise scrollTo animates from the temporary fixed-body position and
+         looks like the page jumps up, then slides back down on mobile. */
+      root.style.scrollBehavior = "auto";
+      if (savedBodyStyles) {
+        body.style.position = savedBodyStyles.position;
+        body.style.top = savedBodyStyles.top;
+        body.style.left = savedBodyStyles.left;
+        body.style.right = savedBodyStyles.right;
+        body.style.width = savedBodyStyles.width;
+        body.style.overflow = savedBodyStyles.overflow;
+      }
+      root.classList.remove("modal-locked");
+      body.classList.remove("modal-locked");
+      window.scrollTo(0, lockedScrollY);
+      root.style.scrollBehavior = savedRootScrollBehavior;
+      savedRootScrollBehavior = "";
+      savedBodyStyles = null;
+    }
   }
   function openLayer(el, focusEl, from) {
     lastFocus = from;
@@ -963,7 +1294,12 @@
     el.inert = true;
     lock();
     if (el === cart) showView("cart");
-    if (lastFocus) lastFocus.focus();
+    /* Returning focus must never scroll the document; the browser may otherwise
+       move to the trigger after the scroll lock has just been removed. */
+    if (lastFocus) {
+      try { lastFocus.focus({ preventScroll: true }); }
+      catch (e) { lastFocus.focus(); }
+    }
   }
 
   function openSheet(li) {
@@ -1015,6 +1351,7 @@
   }
 
   function render() {
+    renderCustomerStock();
     var count = 0;
     items.forEach(function (li, i) {
       count += qty[i];
@@ -1028,6 +1365,7 @@
   }
 
   function change(i, d) {
+    if (d > 0 && isOutOfStock(i)) return;
     var n = qty[i] + d;
     if (n < 0 || n > 99) return;
     var ae = document.activeElement;
@@ -1104,7 +1442,7 @@
   });
   fab.addEventListener("click", function () { showView("cart"); openLayer(cart, cartClose, fab); });
   closeBtn.addEventListener("click", function () { closeLayer(sheet); });
-  cartClose.addEventListener("click", function () { closeLayer(cart); });
+  cartClose.addEventListener("click", function () { cart.classList.remove("qris-payment-active"); closeLayer(cart); });
   sheet.addEventListener("click", function (e) { if (e.target === sheet) closeLayer(sheet); });
   cart.addEventListener("click", function (e) { if (e.target === cart) closeLayer(cart); });
   document.addEventListener("keydown", function (e) {
@@ -1282,15 +1620,29 @@
     }
     paidLink.href = "https://wa.me/" + ADMIN + "?text=" + encodeURIComponent(
       orderText() + "\n\nSaya sudah bayar lewat QRIS sebesar Rp " + fmt(amount) + ". Mohon dikonfirmasi.");
+    cart.classList.add("qris-payment-active");
     showView("pay");
     setMode("wait");
     startTimer();
   }
 
+  function paymentMethod() {
+    var selected = document.querySelector('input[name="payment"]:checked');
+    return selected ? selected.value : "cod";
+  }
   goBtn.addEventListener("click", function () {
-    if (validate()) startPayment();
+    if (!validate()) return;
+    if (paymentMethod() === "cod") {
+      var codUrl = "https://wa.me/" + ADMIN + "?text=" + encodeURIComponent(
+        orderText() + "\\n\\nMetode pembayaran: COD (bayar saat pesanan diterima).");
+      try { sessionStorage.setItem("siMatchaShowOrderSuccess", "1"); } catch (e) {}
+      window.location.href = codUrl;
+      return;
+    }
+    startPayment();
   });
   document.getElementById("pay-back").addEventListener("click", function () {
+    cart.classList.remove("qris-payment-active");
     showView("form");
     goBtn.focus();
   });
@@ -1306,22 +1658,238 @@
   function showSuccess() {
     successOverlay.classList.add("show");
     successOverlay.setAttribute("aria-hidden", "false");
+    lock();
     successClose.focus();
   }
   function hideSuccess() {
     successOverlay.classList.remove("show");
     successOverlay.setAttribute("aria-hidden", "true");
+    lock();
   }
+  window.addEventListener("siMatchaOrderReturned", function () {
+    qty = qty.map(function () { return 0; });
+    try { localStorage.setItem(KEY, JSON.stringify(qty)); } catch (e) {}
+    render();
+    /* Open confirmation before closing the cart so the page stays locked
+       continuously during the overlay handoff (prevents a mobile scroll flash). */
+    showSuccess();
+    closeLayer(cart);
+    successClose.focus();
+  });
   successClose.addEventListener("click", hideSuccess);
   successOverlay.addEventListener("click", function (e) { if (e.target === successOverlay) hideSuccess(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && successOverlay.classList.contains("show")) hideSuccess(); });
   doneBtn.addEventListener("click", function () {
+    cart.classList.remove("qris-payment-active");
+    if (typeof saveSale === "function") saveSale("qris");
     qty = qty.map(function () { return 0; });
     try { localStorage.setItem(KEY, JSON.stringify(qty)); } catch (e) {}
     render();
-    closeLayer(cart);
+    /* Keep the body lock active while swapping cart for confirmation. */
     showSuccess();
+    closeLayer(cart);
+    successClose.focus();
   });
+
+  // Pilihan peran setelah opening
+  var roleGate = document.getElementById("role-gate");
+  var customerChoice = document.getElementById("enter-customer");
+  var adminChoice = document.getElementById("enter-admin");
+  if (customerChoice && roleGate) {
+    customerChoice.addEventListener("click", function () {
+      roleGate.classList.remove("show");
+      roleGate.setAttribute("aria-hidden", "true");
+      lock();
+      window.setTimeout(function () { roleGate.hidden = true; }, 360);
+    });
+  }
+  var adminLayer = document.getElementById("admin-layer");
+  var adminLoginView = document.getElementById("admin-login-view");
+  var adminDashboardView = document.getElementById("admin-dashboard-view");
+  var adminLoginForm = document.getElementById("admin-login-form");
+  var adminLoginError = document.getElementById("admin-login-error");
+  var adminLoginButton = adminLoginForm.querySelector('button[type="submit"]');
+  var LOGIN_GUARD_KEY = "siMatchaAdminLoginGuardV1";
+  var LOGIN_MAX_ATTEMPTS = 3;
+  var LOGIN_LOCK_MS = 5 * 60 * 1000;
+  var loginLockTicker = null;
+  var SALES_KEY = "siMatchaSalesOrdersV1";
+  var STOCK_KEY = "siMatchaMenuStockV1";
+  function readStock() {
+    var result = {};
+    try { result = JSON.parse(localStorage.getItem(STOCK_KEY) || "{}") || {}; } catch (e) {}
+    return result;
+  }
+  function menuStockName(i) {
+    var el = items[i] && items[i].querySelector(".name");
+    return el ? el.textContent.trim() : ("Menu " + (i + 1));
+  }
+  function isOutOfStock(i) { return readStock()[String(i)] === false; }
+  function renderCustomerStock() {
+    items.forEach(function(li, i) {
+      var out = isOutOfStock(i);
+      li.classList.toggle("is-out-of-stock", out);
+      var title = li.querySelector(".name");
+      if (title && !li.querySelector(".customer-stock-status")) {
+        var status = document.createElement("div");
+        status.className = "customer-stock-status";
+        status.textContent = "STOK HABIS";
+        status.setAttribute("aria-live", "polite");
+        title.parentNode.appendChild(status);
+      }
+      var plus = li.querySelector('[data-act="plus"]');
+      if (plus) {
+        plus.disabled = out;
+        plus.setAttribute("aria-label", out ? menuStockName(i) + " stok habis" : "Tambah " + menuStockName(i));
+        plus.title = out ? "Stok habis" : "Tambah ke keranjang";
+      }
+      if (out && qty && qty[i] > 0) {
+        qty[i] = 0;
+        try { localStorage.setItem(KEY, JSON.stringify(qty)); } catch (e) {}
+      }
+    });
+  }
+  function renderAdminStock() {
+    var target = document.getElementById("admin-stock-list");
+    if (!target) return;
+    target.innerHTML = items.map(function(li, i) {
+      var out = isOutOfStock(i), name = escapeAdminText(menuStockName(i));
+      return '<div class="admin-stock-item"><div><div class="admin-stock-name">'+name+'</div><span class="admin-stock-state">'+(out?'Sedang habis':'Tersedia')+'</span></div><button type="button" class="admin-stock-toggle '+(out?'in':'out')+'" data-stock-index="'+i+'">'+(out?'✓ Tandai tersedia':'Tandai stok habis')+'</button></div>';
+    }).join("");
+    target.querySelectorAll("[data-stock-index]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var idx = Number(btn.getAttribute("data-stock-index"));
+        var stock = readStock();
+        stock[String(idx)] = stock[String(idx)] === false ? true : false;
+        try { localStorage.setItem(STOCK_KEY, JSON.stringify(stock)); } catch (e) {}
+        renderCustomerStock();
+        render();
+        renderAdminStock();
+      });
+    });
+  }
+  window.addEventListener("storage", function(e) {
+    if (e.key === STOCK_KEY) { renderCustomerStock(); render(); if (adminDashboardView && !adminDashboardView.hidden) renderAdminStock(); }
+  });
+
+  function readSales() {
+    try { var data = JSON.parse(localStorage.getItem(SALES_KEY) || "[]"); return Array.isArray(data) ? data : []; }
+    catch (e) { return []; }
+  }
+  function saveSale(paymentType) {
+    // Ringkasan transaksi tanpa menyimpan nomor telepon atau alamat pelanggan.
+    var amount = total();
+    if (!amount) return;
+    var lines = [];
+    qty.forEach(function (q, i) {
+      if (q > 0) lines.push({ name: (items[i].querySelector(".name") || {}).textContent || ("Menu " + (i + 1)), qty: q, price: Number(prices[i]) || 0 });
+    });
+    if (!lines.length) return;
+    var sales = readSales();
+    sales.push({ id: "SM-" + Date.now().toString(36).toUpperCase(), createdAt: new Date().toISOString(), total: amount, payment: paymentType, items: lines });
+    try { localStorage.setItem(SALES_KEY, JSON.stringify(sales)); } catch (e) { console.warn("Data penjualan tidak dapat disimpan di browser ini.", e); }
+  }
+  function formatRupiah(value) { return "Rp " + Math.round(Number(value) || 0).toLocaleString("id-ID"); }
+  function renderAdminDashboard() {
+    renderAdminStock();
+    var sales = readSales().sort(function (a,b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+    var revenue = sales.reduce(function (n,o) { return n + (Number(o.total) || 0); }, 0);
+    var units = sales.reduce(function (n,o) { return n + (o.items || []).reduce(function (m,it) { return m + (Number(it.qty) || 0); },0); },0);
+    document.getElementById("admin-revenue").textContent = formatRupiah(revenue);
+    document.getElementById("admin-orders").textContent = sales.length.toLocaleString("id-ID");
+    document.getElementById("admin-units").textContent = units.toLocaleString("id-ID");
+    document.getElementById("admin-average").textContent = formatRupiah(sales.length ? revenue / sales.length : 0);
+    var dayData = [];
+    for (var d=6; d>=0; d--) {
+      var date = new Date(); date.setHours(0,0,0,0); date.setDate(date.getDate()-d);
+      var key = date.toISOString().slice(0,10);
+      var val = sales.filter(function(o) { return String(o.createdAt || "").slice(0,10) === key; }).reduce(function(n,o){return n+(Number(o.total)||0);},0);
+      dayData.push({ label: date.toLocaleDateString("id-ID",{day:"numeric",month:"short"}), value: val });
+    }
+    var maxDay = Math.max.apply(null, dayData.map(function(x){return x.value;})) || 1;
+    document.getElementById("admin-bars").innerHTML = dayData.map(function(x){return '<div class="admin-bar-item"><b>'+(x.value ? (x.value>=1000000?(x.value/1000000).toFixed(1)+"jt":x.value>=1000?Math.round(x.value/1000)+"rb":x.value) : "–")+'</b><div class="admin-bar" style="height:'+Math.max(3,x.value/maxDay*135)+'px" title="'+formatRupiah(x.value)+'"></div><small>'+x.label+'</small></div>';}).join("");
+    var products = {};
+    sales.forEach(function(o){(o.items||[]).forEach(function(it){var k=it.name||"Menu";products[k]=(products[k]||0)+(Number(it.qty)||0);});});
+    var ranked = Object.keys(products).map(function(k){return {name:k,qty:products[k]};}).sort(function(a,b){return b.qty-a.qty;}).slice(0,6);
+    var maxProduct = ranked.length ? ranked[0].qty : 1;
+    document.getElementById("admin-products").innerHTML = ranked.length ? ranked.map(function(it){return '<div class="admin-product"><span class="admin-product-name">'+escapeAdminText(it.name)+'</span><strong>'+it.qty+' cup</strong><div class="admin-product-track"><span style="width:'+(it.qty/maxProduct*100)+'%"></span></div></div>';}).join("") : '<div class="admin-empty">Belum ada data penjualan.</div>';
+    var table = document.getElementById("admin-order-table");
+    table.innerHTML = sales.length ? '<table class="admin-table"><thead><tr><th>ID Pesanan</th><th>Tanggal</th><th>Menu</th><th>Pembayaran</th><th>Total</th></tr></thead><tbody>'+sales.slice(0,12).map(function(o){var names=(o.items||[]).map(function(it){return escapeAdminText(it.name)+" ×"+(Number(it.qty)||0);}).join(", ");return '<tr><td>'+escapeAdminText(o.id||"-")+'</td><td>'+new Date(o.createdAt).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})+'</td><td>'+names+'</td><td>'+((o.payment||"-")==="qris"?"QRIS":"COD")+'</td><td><strong>'+formatRupiah(o.total)+'</strong></td></tr>';}).join("")+'</tbody></table>' : '<div class="admin-empty">Belum ada pesanan tercatat. Pesanan baru akan muncul setelah transaksi dikonfirmasi melalui alur website.</div>';
+  }
+  function escapeAdminText(value) { return String(value == null ? "" : value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function readLoginGuard() {
+    try { return JSON.parse(localStorage.getItem(LOGIN_GUARD_KEY) || "null") || { attempts: 0, lockedUntil: 0 }; }
+    catch (_) { return { attempts: 0, lockedUntil: 0 }; }
+  }
+  function writeLoginGuard(state) {
+    try { localStorage.setItem(LOGIN_GUARD_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+  function remainingLoginLock() { return Math.max(0, Number(readLoginGuard().lockedUntil || 0) - Date.now()); }
+  function updateLoginLockUI() {
+    var remaining = remainingLoginLock();
+    var locked = remaining > 0;
+    var usernameInput = document.getElementById("admin-username");
+    var passwordInput = document.getElementById("admin-password");
+    usernameInput.disabled = locked; passwordInput.disabled = locked; adminLoginButton.disabled = locked;
+    adminLoginButton.style.opacity = locked ? ".6" : "1";
+    if (locked) {
+      var seconds = Math.ceil(remaining / 1000);
+      var minutes = Math.floor(seconds / 60), secs = seconds % 60;
+      adminLoginError.textContent = "Login dikunci sementara setelah 3 kali gagal. Coba lagi dalam " + minutes + ":" + String(secs).padStart(2, "0") + ".";
+    } else if (readLoginGuard().lockedUntil) {
+      writeLoginGuard({ attempts: 0, lockedUntil: 0 });
+      adminLoginError.textContent = "Waktu blokir selesai. Silakan coba login kembali.";
+    }
+    return !locked;
+  }
+  function openAdminLogin() {
+    if (roleGate) { roleGate.classList.remove("show"); roleGate.setAttribute("aria-hidden","true"); roleGate.hidden = true; }
+    adminLayer.classList.remove("dashboard-open");
+    adminLayer.classList.add("show"); adminLayer.setAttribute("aria-hidden","false");
+    lock();
+    adminLoginView.hidden = false; adminDashboardView.hidden = true;
+    document.getElementById("admin-username").value = ""; document.getElementById("admin-password").value = "";
+    updateLoginLockUI();
+    if (loginLockTicker) window.clearInterval(loginLockTicker);
+    loginLockTicker = window.setInterval(function(){ if (!adminLayer.classList.contains("show")) return; updateLoginLockUI(); }, 1000);
+    if (remainingLoginLock() <= 0) document.getElementById("admin-username").focus();
+  }
+  function closeAdminToRole() {
+    adminLayer.classList.remove("show", "dashboard-open"); adminLayer.setAttribute("aria-hidden","true");
+    if (roleGate) { roleGate.hidden = false; roleGate.classList.add("show"); roleGate.setAttribute("aria-hidden","false"); }
+    lock();
+  }
+  if (adminChoice) adminChoice.addEventListener("click", openAdminLogin);
+  document.getElementById("admin-login-back").addEventListener("click", closeAdminToRole);
+  adminLoginForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (!updateLoginLockUI()) return;
+    var username = document.getElementById("admin-username").value;
+    var password = document.getElementById("admin-password").value;
+    if (username === "adminmegachiko" && password === "megachiko070824") {
+      writeLoginGuard({ attempts: 0, lockedUntil: 0 });
+      adminLoginError.textContent = ""; adminLoginView.hidden = true; adminDashboardView.hidden = false;
+      adminLayer.classList.add("dashboard-open"); renderAdminDashboard();
+    } else {
+      var guard = readLoginGuard();
+      guard.attempts = (Number(guard.attempts) || 0) + 1;
+      if (guard.attempts >= LOGIN_MAX_ATTEMPTS) {
+        guard.attempts = 0; guard.lockedUntil = Date.now() + LOGIN_LOCK_MS;
+        writeLoginGuard(guard); updateLoginLockUI();
+      } else {
+        writeLoginGuard(guard);
+        adminLoginError.textContent = "Username atau kata sandi salah. Percobaan " + guard.attempts + " dari " + LOGIN_MAX_ATTEMPTS + ".";
+        document.getElementById("admin-password").select();
+      }
+    }
+  });
+  document.getElementById("admin-logout").addEventListener("click", closeAdminToRole);
+  document.getElementById("admin-refresh").addEventListener("click", renderAdminDashboard);
+  // Catat COD saat pesanan dikirim ke WhatsApp, dan QRIS saat admin/pelanggan menyelesaikan langkah konfirmasi.
+  if (goBtn) goBtn.addEventListener("click", function() {
+    if (!validate()) return;
+    if (paymentMethod() === "cod") saveSale("cod");
+  }, true);
 
   render();
 </script>
